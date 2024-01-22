@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json());
 app.use(morgan('dev'));
 
-const port = process.env.PORT || 3000;
+
 
 
 
@@ -32,9 +32,4 @@ app.use('/api/v1/tours',tourRouter );
 // users
 app.use('/api/v1/users', userRouter);
 
-
-// Start server
-
-app.listen(port, () => {
-  console.log(`server running on http://localhost:${port}`);
-});
+module.exports = app;
