@@ -13,12 +13,21 @@ const checkId = (req, res, next) => {
   next();
 };
 
+const checkBody = (req, res, next) => {
+  if (!req.body.name || !req.body.price) {
+    return res
+      .status(400)
+      .json({ status: 'failed', message: 'missing name or price' });
+  }
+  next();
+};
+
 const getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
     results: tours.length,
     data: { tours },
-  }); 
+  });
 };
 
 const createTour = (req, res) => {
@@ -38,6 +47,8 @@ const createTour = (req, res) => {
 };
 
 const getTour = (req, res) => {
+  const id = req.params.id * 1;
+  const tour = tours.find((tour) => tour.id === id);
   res.status(200).send({
     status: 'success',
     data: tour,
@@ -65,4 +76,5 @@ module.exports = {
   deleteTour,
   getTour,
   checkId,
+  checkBody,
 };
