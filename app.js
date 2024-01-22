@@ -1,4 +1,3 @@
-const fs = require('fs');
 const express = require('express');
 const morgan = require('morgan');
 const tourRouter = require('./routes/tourRoutes')
@@ -20,9 +19,6 @@ const port = process.env.PORT || 3000;
 app.get('/', (req, res) => {
   res.send('server running perfectly');
 });
-
-// 2) controllers
-
 
 
 
