@@ -3,8 +3,32 @@ const Tour = require("../models/tourModel");
 // sending all tours
 
 const getAllTours = async (req, res) => {
+  console.log(req.query);
   try {
-    const tours = await Tour.find();
+
+// Build the query
+
+// filtering
+    const queryObj = {...req.query};
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    excludedFields.forEach(el=>delete queryObj[el])
+
+// {difficulty: 'easy', duration: {$gte: 5}} on mongodB
+//  { difficulty: 'easy', duration: { gte: '5' } }
+
+    const query = Tour.find(queryObj);
+
+    // execute the query
+    const tours = await query;
+
+    // const tours = await Tour.find()
+    //   .where("duration")
+    //   .equals(5)
+    //   .where("difficulty")
+    //   .equals("easy");
+
+
+//  send response 
     return res.status(200).json({
       status: "success",
       results: tours.length,
