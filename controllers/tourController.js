@@ -21,17 +21,19 @@ const getAllTours = async (req, res) => {
 
     // 2) sorting
     if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
+      const sortBy = req.query.sort.split(",").join(" ");
 
       query = query.sort(sortBy);
       // sort ('price ratingsAverage')
+    } else {
+      query = query.sort("-createdAt");
     }
 
     // execute the query
     const tours = await query;
 
     // const tours = await Tour.find()
-    //   .where("duration") 
+    //   .where("duration")
     //   .equals(5)
     //   .where("difficulty")
     //   .equals("easy");
