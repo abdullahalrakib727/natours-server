@@ -1,10 +1,19 @@
+const { Error } = require("mongoose");
 const Tour = require("../models/tourModel");
 
-// sending all tours
+// sending top
+const aliasTopTour = (req, res, next) => {
+  req.query.limit = "5";
+  req.query.sort = "-ratingsAverage,price";
+  req.query.fields = "name, price, ratingsAverage, summary, difficulty ";
+  next();
+};
 
+// sending all tours
 const getAllTours = async (req, res) => {
   try {
     console.log(req.query);
+
     // Build the query
 
     // 1A)  filtering
@@ -13,7 +22,6 @@ const getAllTours = async (req, res) => {
     excludedFields.forEach((el) => delete queryObj[el]);
 
     // 1B) Advanced filtering
-
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
@@ -33,8 +41,25 @@ const getAllTours = async (req, res) => {
     if (req.query.fields) {
       const fields = req.query.fields.split(",").join(" ");
       query = query.select(fields);
-    }else{
-      query = query.select('-__v')
+    } else {
+      query = query.select("-__v");
+    }
+
+    // 4) pagination
+
+    // page=2&limit=10, page=1, 1-10; page=2, 11-20;
+
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 100;
+    const skip = (page - 1) * limit;
+
+    query = query.skip(skip).limit(limit);
+
+    if (req.query.page) {
+      const numTours = await Tour.countDocuments();
+      if (skip >= numTours) {
+        throw new Error("This page does not exits");
+      }
     }
 
     // execute the query
@@ -126,4 +151,5 @@ module.exports = {
   updateTour,
   deleteTour,
   getTour,
+  aliasTopTour,
 };
