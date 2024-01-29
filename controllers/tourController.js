@@ -53,12 +53,11 @@ const createTour = async (req, res) => {
   }
 };
 
-// sending sing tour by id
+// sending single tour by id
 
 const getTour = async (req, res) => {
   try {
     const tour = await Tour.findById(req.params.id);
-    // Tour.findOne({_id:req.params.id})
 
     return res.status(200).send({
       status: "success",
@@ -101,6 +100,8 @@ const deleteTour = async (req, res) => {
   }
 };
 
+// get tour stats based on difficulty level and ratings
+
 const getTourStats = async (req, res) => {
   try {
     const stats = await Tour.aggregate([
@@ -108,8 +109,8 @@ const getTourStats = async (req, res) => {
       {
         $group: {
           _id: { $toUpper: "$difficulty" },
-          num: { $sum: 1 },
-          numRating: { $sum: "$ratingsQuantity" },
+          numTours: { $sum: 1 },
+          numRating: { $sum: "$ratingQuantity" },
           avgRating: { $avg: "$ratingsAverage" },
           avgPrice: { $avg: "$price" },
           minPrice: { $min: "$price" },
@@ -130,6 +131,56 @@ const getTourStats = async (req, res) => {
   }
 };
 
+// get total tour count by months of a year
+
+const getMonthlyPlan = async (req, res) => {
+  try {
+    const year = req.params.year * 1; // 2021
+
+    const plan = await Tour.aggregate([
+      {
+        $unwind: "$startDates",
+      },
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: "$startDates" },
+          numTourStarts: { $sum: 1 },
+          tours: { $push: "$name" },
+        },
+      },
+      {
+        $addFields: { month: "$_id" },
+      },
+      {
+        $project: {
+          _id: 0
+        }
+      },
+      {
+        $sort: {numTourStarts: -1}
+      },
+      {
+        $limit: 12
+      }
+
+    ]);
+    return res.status(200).json({
+      status: "success",
+      data: plan,
+    });
+  } catch (error) {
+    return res.status(404).json({ status: "failed", message: error.message });
+  }
+};
+
 module.exports = {
   getAllTours,
   createTour,
@@ -138,4 +189,5 @@ module.exports = {
   getTour,
   aliasTopTour,
   getTourStats,
+  getMonthlyPlan,
 };
