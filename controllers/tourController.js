@@ -161,16 +161,15 @@ const getMonthlyPlan = async (req, res) => {
       },
       {
         $project: {
-          _id: 0
-        }
+          _id: 0,
+        },
       },
       {
-        $sort: {numTourStarts: -1}
+        $sort: { numTourStarts: -1 },
       },
       {
-        $limit: 12
-      }
-
+        $limit: 12,
+      },
     ]);
     return res.status(200).json({
       status: "success",
